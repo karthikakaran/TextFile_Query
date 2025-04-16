@@ -1,0 +1,17 @@
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;    
+}
+
+.content {
+  padding: 2rem;  
+}
+
+.fileupload {
+  width: 80%;
+  padding: .375rem .75rem;
+  border: var(--bs-border-width) solid var(--bs-border-color);
+  border-radius: var(--bs-border-radius);
+}
