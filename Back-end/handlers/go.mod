@@ -2,7 +2,10 @@ module filequery
 
 go 1.24.2
 
-require google.golang.org/api v0.229.0
+require (
+	github.com/joho/godotenv v1.5.1
+	google.golang.org/api v0.229.0
+)
 
 require (
 	cloud.google.com/go v0.118.3 // indirect

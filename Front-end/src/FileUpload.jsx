@@ -12,7 +12,7 @@ const FileUpload = (props) => {
   }
 
   const handleSubmit = async (e) => {
-    e.preventDefault(); // Prevent the default form submission (page reload)
+    e.preventDefault();
 
     try {
       const newFileData = new FormData();
@@ -41,7 +41,7 @@ const FileUpload = (props) => {
                 encType="multipart/form-data"
                 onSubmit={handleSubmit}
                 method="post">
-                <input type="file" name="inputFile" className="fileupload" required onChange={handleChange} />
+                <input type="file" name="inputFile" className="fileupload" accept=".txt" required onChange={handleChange} />
                 <Button type="submit" value="upload"><IoMdCloudUpload tabIndex="0" type="submit" value="upload" size="1.5rem"/></Button>
               </form>
             </Col>

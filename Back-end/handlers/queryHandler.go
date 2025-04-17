@@ -8,6 +8,7 @@ import (
 	"os"
 
 	"github.com/google/generative-ai-go/genai"
+	"github.com/joho/godotenv"
 	"google.golang.org/api/option"
 )
 
@@ -25,8 +26,13 @@ func QueryHandler(w http.ResponseWriter, r *http.Request) {
 	queryText := queryValues.Get("queryText")
 
 	ctx := context.Background()
-	// apiKey := os.Getenv("")
-	client, err := genai.NewClient(ctx, option.WithAPIKey("AIzaSyAbAFMtv1vikIFIQECG9hRRFofyvBjhu4w"))
+
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal(err)
+	}
+	apiKey := os.Getenv("API_KEY")
+	client, err := genai.NewClient(ctx, option.WithAPIKey(apiKey))
 	if err != nil {
 		log.Fatal(err)
 	}
