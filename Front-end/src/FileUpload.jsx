@@ -1,9 +1,12 @@
 import React, {useState} from 'react'
-import { Button, Col, Row } from 'react-bootstrap';
+import { Button, Col, Row, Alert } from 'react-bootstrap';
 import { IoMdCloudUpload } from "react-icons/io";
 
 const FileUpload = (props) => {
   const [file, setFile] = useState(null)
+  const [show, setShow] = useState(false)
+  const [status, setStatus] = useState("")
+  const [message, setMessage] = useState("")
 
   const handleChange = (e) => {
     const parts = e.target.value.split('\\')
@@ -26,10 +29,13 @@ const FileUpload = (props) => {
       if (!res.ok) {
         throw new Error(`HTTP error! status: ${res.status}`);
       }
-      const text = await res.text();
-      console.log(text);
+      setMessage(await res.text())
+      setStatus("success")
+      setShow(true)
     } catch (err) {
-      console.log(err)
+      setMessage("Error : ", err)
+      setStatus("danger")
+      setShow(true)
     }
   };
   return (
@@ -46,6 +52,7 @@ const FileUpload = (props) => {
               </form>
             </Col>
           </Row>
+          { show && <Alert key={status} variant={status}  onClose={() => setShow(false)} dismissible>{message}</Alert> }
     </div>
   )
 }

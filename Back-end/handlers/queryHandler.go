@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 
@@ -13,9 +12,13 @@ import (
 )
 
 func QueryHandler(w http.ResponseWriter, r *http.Request) {
+
 	EnableCors(&w)
+
+	w.Header().Set("Content-Type", "text/plain")
+
 	if r.Method != http.MethodGet {
-		w.WriteHeader(http.StatusMethodNotAllowed) // 405
+		w.WriteHeader(http.StatusMethodNotAllowed)
 		fmt.Fprintf(w, "Method not allowed: %s", r.Method)
 		return
 	}
@@ -29,12 +32,15 @@ func QueryHandler(w http.ResponseWriter, r *http.Request) {
 
 	err := godotenv.Load()
 	if err != nil {
-		log.Fatal(err)
+		w.WriteHeader(http.StatusUnauthorized)
+		fmt.Fprintf(w, "%s", "Add a file for Keys")
 	}
+
 	apiKey := os.Getenv("API_KEY")
 	client, err := genai.NewClient(ctx, option.WithAPIKey(apiKey))
 	if err != nil {
-		log.Fatal(err)
+		w.WriteHeader(http.StatusUnauthorized)
+		fmt.Fprintf(w, "%s", "Cannot connect to LLM")
 	}
 	defer client.Close()
 
@@ -43,7 +49,8 @@ func QueryHandler(w http.ResponseWriter, r *http.Request) {
 	// Read the file
 	textBytes, err := os.ReadFile(fileName)
 	if err != nil {
-		log.Fatalf("Error reading file: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(w, "%s", "Error reading file")
 	}
 	text := string(textBytes)
 
@@ -63,15 +70,16 @@ func QueryHandler(w http.ResponseWriter, r *http.Request) {
 
 	resp, err := model.GenerateContent(ctx, genai.Text(prompt))
 	if err != nil {
-		log.Fatal(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(w, "%v", err)
 	}
 
-	resultString := "" // Initialize an empty string to accumulate the parts
+	resultString := "" // Accumulate the parts
 
 	for _, cand := range resp.Candidates {
 		if cand.Content != nil {
 			for _, part := range cand.Content.Parts {
-				// Access the text using part.Data if part is of type Text.
+				// Access the text using part.Data if part is of type Text
 				switch p := part.(type) {
 				case genai.Text:
 					resultString += string(p) + " "
@@ -82,8 +90,6 @@ func QueryHandler(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	}
-	// fmt.Println(resultString)
-	w.Header().Set("Content-Type", "text/plain") //"application/json"
 	w.WriteHeader(http.StatusOK)
 	fmt.Fprintf(w, "%s", resultString)
 }

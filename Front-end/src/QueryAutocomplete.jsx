@@ -1,14 +1,13 @@
 import React, { useState } from "react";
-import { Form, ListGroup } from "react-bootstrap";
-import Col from 'react-bootstrap/Col';
-import Row from 'react-bootstrap/Row';
+import { Form, ListGroup, Alert, Col, Row } from "react-bootstrap";
 import { IoSearchCircleOutline } from "react-icons/io5";
 
 const QueryAutocomplete = (props) => {
     const [queryHistory, setQueryHistory] = useState([])
     const [currentQuery, setCurrentQuery] = useState("")
     const [querySuggestions, setQuerySuggestions] = useState([])
-  
+    const [show, setShow] = useState(false)
+
     const queryToAPI = () => {
         fetch(`http://localhost:8080/query?fileName=${props.fileName}&queryText=${currentQuery}`, { method : "GET" })
         .then((response) => { return response.text() })
@@ -17,12 +16,18 @@ const QueryAutocomplete = (props) => {
     }
 
     const updateQueryHistory = (queryText) =>  {
-      if(queryText) {
-        if (queryHistory.length >= 5) queryHistory.pop();
-        setQueryHistory([queryText, ...queryHistory]);
+      if(queryText && props.fileName) {
+        //To avoid duplicate history entry
+        if (!queryHistory.includes(queryText)) {
+            if (queryHistory.length >= 5) queryHistory.pop();
+            setQueryHistory([queryText, ...queryHistory]);
+        }
+
         setQuerySuggestions([]);
         setCurrentQuery("");
         queryToAPI();
+      } else {
+        setShow(true)
       }
     }
 
@@ -55,12 +60,13 @@ const QueryAutocomplete = (props) => {
                             </ListGroup>
                         </Form.Group>
                     </Col>
-                    <Col xs={2}>                 
+                    <Col xs={2}>
                         <IoSearchCircleOutline role="button" tabIndex="0" size="2rem" 
                                                 onClick={e => updateQueryHistory(currentQuery)}/>
                     </Col>
                 </Row>
             </Form>
+            { show && <Alert key="warning" variant="warning"  onClose={() => setShow(false)} dismissible>Enter query and upload file to proceed !</Alert> }
         </div>
       )
 }

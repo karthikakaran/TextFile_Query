@@ -9,19 +9,23 @@ import (
 
 func UploadHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		w.WriteHeader(http.StatusMethodNotAllowed) // 405
+		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
 
 	EnableCors(&w)
+
+	w.Header().Set("Content-Type", "text/plain")
+
 	// Maximum upload of 10 MB files
 	r.ParseMultipartForm(10 << 20)
 
 	// Get handler for filename, size and headers
 	file, handler, err := r.FormFile("file")
 	if err != nil {
-		fmt.Println("Error Retrieving the File")
-		fmt.Println(err)
+		fmt.Println("Error Retrieving the File : ", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(w, "%s", "Upload failed")
 		return
 	}
 
